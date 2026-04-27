@@ -100,6 +100,8 @@ The Dockerfile accepts a build arg if you want another ref, for example PR [#133
 docker build -f Dockerfile.icloudpd-pr1327 --build-arg ICLOUDPD_GIT_REF=refs/pull/1335/head -t icloudpd:pr1335 .
 ```
 
+To build **and** set `ICLOUDPD_IMAGE` in the **current** shell (not a subshell), use **`source`**: `source ./build.sh` (see `build.sh`).
+
 ## Upstream
 
 Behavior and flags follow [icloud-photos-downloader / icloudpd](https://github.com/icloud-photos-downloader/icloud_photos_downloader). See upstream docs for password types, two-factor flow, and CLI options.
