@@ -1,0 +1,29 @@
+# icloudpd built from upstream PR #1327 (2FA push / trustedPhoneNumbers fixes).
+# Official Hub images ship PyInstaller musl binaries; this image installs the same
+# Python package from Git instead so you can run an unmerged PR.
+#
+# Build (repo root):
+#   docker build -f Dockerfile.icloudpd-pr1327 -t icloudpd:pr1327 .
+#
+# Use: set ICLOUDPD_IMAGE=icloudpd:pr1327 in the environment or in your instance .env
+# (see icloud-photo-sync.sh).
+#
+# - PR #1327: https://github.com/icloud-photos-downloader/icloud_photos_downloader/pull/1327
+# - Some users report pushes work but verification then fails; try PR #1335 instead:
+#   https://github.com/icloud-photos-downloader/icloud_photos_downloader/pull/1335
+#   (change the pip URL below to refs/pull/1335/head or a fork branch you trust).
+
+FROM python:3.12-slim-bookworm
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git \
+  && rm -rf /var/lib/apt/lists/*
+
+ARG ICLOUDPD_GIT_REF=refs/pull/1327/head
+
+RUN pip install --no-cache-dir --upgrade pip \
+  && pip install --no-cache-dir \
+    "git+https://github.com/icloud-photos-downloader/icloud_photos_downloader.git@${ICLOUDPD_GIT_REF}"
+
+ENV TZ=UTC
+WORKDIR /app

@@ -43,6 +43,7 @@ set +a
 INTERVAL="${INTERVAL:-36000}"
 UNTIL_FOUND="${UNTIL_FOUND:-500}"
 TZ="${TZ:-America/Los_Angeles}"
+ICLOUDPD_IMAGE="${ICLOUDPD_IMAGE:-icloudpd/icloudpd:latest}"
 
 # Optional: default is ./cookies relative to the current working directory (PWD).
 COOKIE_FOLDER="${COOKIE_FOLDER:-${PWD}/cookies}"
@@ -83,7 +84,7 @@ docker run "${docker_run_flags[@]}" \
   -v "${DATA_FOLDER}/${INSTANCE_NAME}:/data" \
   -v "${COOKIE_FOLDER}:/app/cookie" \
   -e "TZ=${TZ}" \
-  icloudpd/icloudpd:latest \
+  "${ICLOUDPD_IMAGE}" \
   icloudpd \
   --directory /data \
   --username "${ICLOUD_USERNAME}" \

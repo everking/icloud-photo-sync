@@ -71,6 +71,7 @@ Optional (defaults in parentheses):
 - `INTERVAL` — watch poll interval in seconds (`36000`)
 - `UNTIL_FOUND` — passed to `--until-found` (`500`)
 - `TZ` — container timezone, e.g. for folder dates (`America/Los_Angeles`)
+- `ICLOUDPD_IMAGE` — Docker image passed to `docker run` (`icloudpd/icloudpd:latest` by default); use a locally built tag for unmerged upstream fixes (see below)
 
 ## Security
 
@@ -82,6 +83,22 @@ Optional (defaults in parentheses):
 - Use **LF** line endings in `*.env` files if you edit them on Windows, or paths and logins can break on Linux.
 - `AUTH` needs an interactive terminal for MFA prompts.
 - **Current working directory matters** for the default `DATA_FOLDER` and `COOKIE_FOLDER`: `cd` to the directory you want those paths anchored under before running the script, or set both variables explicitly in the env file.
+
+## Patched / custom `icloudpd` image (e.g. PR #1327)
+
+The Hub image `icloudpd/icloudpd:latest` is built from **released** sources. To run an **unmerged** fix (such as [PR #1327](https://github.com/icloud-photos-downloader/icloud_photos_downloader/pull/1327) for 2FA push behavior), build a local image that installs the project from Git, then point the script at it:
+
+```bash
+docker build -f Dockerfile.icloudpd-pr1327 -t icloudpd:pr1327 .
+```
+
+Set **`ICLOUDPD_IMAGE`** (environment or in your `*.env`) to that tag, e.g. `ICLOUDPD_IMAGE=icloudpd:pr1327`.
+
+The Dockerfile accepts a build arg if you want another ref, for example PR [#1335](https://github.com/icloud-photos-downloader/icloud_photos_downloader/pull/1335) (reported by some users to work when #1327 triggers “Incorrect Verification Code” after entering the code):
+
+```bash
+docker build -f Dockerfile.icloudpd-pr1327 --build-arg ICLOUDPD_GIT_REF=refs/pull/1335/head -t icloudpd:pr1335 .
+```
 
 ## Upstream
 
