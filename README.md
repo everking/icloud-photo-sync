@@ -18,12 +18,12 @@ Small Bash helper around the official [`icloudpd/icloudpd`](https://hub.docker.c
    cp .env.example eric.env
    ```
 
-3. Edit `eric.env`: set `DATA_FOLDER`, `USERNAME`, `PASSWORD`, and adjust `TZ` if needed. Optional: `COOKIE_FOLDER` (defaults to a `cookies` directory next to the script), `INTERVAL` (default `36000`), `UNTIL_FOUND` (default `500`).
+3. Edit `eric.env`: set **`ICLOUD_USERNAME`** and **`ICLOUD_PASSWORD`** (see [upstream auth](https://icloud-photos-downloader.github.io/icloud_photos_downloader/authentication.html)). Optionally set `DATA_FOLDER`, `TZ`, `COOKIE_FOLDER`, `INTERVAL`, and `UNTIL_FOUND` (defaults below).
 
 4. On the host, ensure directories exist as needed, for example:
 
-   - `${DATA_FOLDER}/<instance>/` — mounted as `/data` in the container for both modes  
-   - Cookie directory — defaults to `<repo>/cookies` → `/app/cookie`, or set `COOKIE_FOLDER` in the env file
+   - **`${DATA_FOLDER}/<instance>/`** — download mount → `/data` in the container (`DATA_FOLDER` defaults to `./data` under your **current working directory** when you run the script)  
+   - **Cookie directory** — defaults to `cookies/` under that same **current working directory** → `/app/cookie`, or set `COOKIE_FOLDER` in the env file
 
 5. Make the script executable:
 
@@ -41,7 +41,7 @@ The second argument is case-insensitive (`auth`, `SYNC`, etc.).
 
 | Mode   | What it does |
 |--------|----------------|
-| **AUTH** | Runs `icloudpd --auth-only` with a TTY (`-it --rm`) so you can complete Apple / web MFA and refresh cookies. Container name: `<instance>-auth-only-icloudpd`. |
+| **AUTH** | Runs `icloudpd --auth-only` with a TTY (`-it --rm`) so you can complete Apple / web MFA and refresh cookies. Container name: `<instance>-auth-only-icloudpd`. Creates `COOKIE_FOLDER` if missing (`mkdir -p`). |
 | **SYNC** | Runs a detached watcher (`-it -d --rm`) with `--until-found` and `--watch-with-interval`. Container name: `<instance>-sync-icloudpd`. The resolved `COOKIE_FOLDER` must already exist as a directory (e.g. after **AUTH** created it). |
 
 Examples:
@@ -57,17 +57,17 @@ Before each run, the script stops and removes the container for that mode and in
 
 Configuration is read from **`<instance_name>.env`** in the same directory as `icloud-photo-sync.sh` (for example `eric.env` for `./icloud-photo-sync.sh eric …`).
 
-Variables **must** be set (the script exits with an error if any are missing):
+Variables **must** be set (the script exits with an error if either is missing or empty):
 
-| Variable      | Purpose |
-|---------------|--------|
-| `DATA_FOLDER` | Host root used with `<instance>` for the download mount: `${DATA_FOLDER}/<instance>` → `/data` |
-| `USERNAME`    | Apple ID email for `icloudpd` |
-| `PASSWORD`    | Account password (or app-specific password, per icloudpd docs) |
+| Variable            | Purpose |
+|---------------------|--------|
+| `ICLOUD_USERNAME`   | Apple ID email passed to `icloudpd --username` |
+| `ICLOUD_PASSWORD`   | Password (or app-specific password, per upstream docs) for `icloudpd --password` |
 
 Optional (defaults in parentheses):
 
-- `COOKIE_FOLDER` — host directory mounted at `/app/cookie` (default: `cookies` next to `icloud-photo-sync.sh`). Set explicitly if you run several Apple IDs and need separate cookie directories.
+- `DATA_FOLDER` — host root for `${DATA_FOLDER}/<instance>` → `/data` (default: `data` under the process **current working directory**, i.e. `${PWD}/data`)
+- `COOKIE_FOLDER` — host directory mounted at `/app/cookie` (default: `cookies` under **current working directory**, i.e. `${PWD}/cookies`). Set explicitly if you run several Apple IDs and need separate cookie directories.
 - `INTERVAL` — watch poll interval in seconds (`36000`)
 - `UNTIL_FOUND` — passed to `--until-found` (`500`)
 - `TZ` — container timezone, e.g. for folder dates (`America/Los_Angeles`)
@@ -81,6 +81,7 @@ Optional (defaults in parentheses):
 
 - Use **LF** line endings in `*.env` files if you edit them on Windows, or paths and logins can break on Linux.
 - `AUTH` needs an interactive terminal for MFA prompts.
+- **Current working directory matters** for the default `DATA_FOLDER` and `COOKIE_FOLDER`: `cd` to the directory you want those paths anchored under before running the script, or set both variables explicitly in the env file.
 
 ## Upstream
 

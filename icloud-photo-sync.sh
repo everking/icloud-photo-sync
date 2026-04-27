@@ -44,13 +44,13 @@ INTERVAL="${INTERVAL:-36000}"
 UNTIL_FOUND="${UNTIL_FOUND:-500}"
 TZ="${TZ:-America/Los_Angeles}"
 
-# Optional: default is a "cookies" directory next to this script.
-COOKIE_FOLDER="${COOKIE_FOLDER:-${SCRIPT_DIR}/cookies}"
+# Optional: default is ./cookies relative to the current working directory (PWD).
+COOKIE_FOLDER="${COOKIE_FOLDER:-${PWD}/cookies}"
+DATA_FOLDER="${DATA_FOLDER:-${PWD}/data}"
 
 # Required in ${INSTANCE_NAME}.env — no defaults (unset or empty exits here).
-: "${DATA_FOLDER:?Set DATA_FOLDER in ${INSTANCE_NAME}.env}"
-: "${USERNAME:?Set USERNAME in ${INSTANCE_NAME}.env}"
-: "${PASSWORD:?Set PASSWORD in ${INSTANCE_NAME}.env}"
+: "${ICLOUD_USERNAME:?Set ICLOUD_USERNAME in ${INSTANCE_NAME}.env}"
+: "${ICLOUD_PASSWORD:?Set ICLOUD_PASSWORD in ${INSTANCE_NAME}.env}"
 
 case "${MODE}" in
   AUTH)
@@ -86,7 +86,7 @@ docker run "${docker_run_flags[@]}" \
   icloudpd/icloudpd:latest \
   icloudpd \
   --directory /data \
-  --username "${USERNAME}" \
-  --password "${PASSWORD}" \
+  --username "${ICLOUD_USERNAME}" \
+  --password "${ICLOUD_PASSWORD}" \
   --cookie-directory /app/cookie \
   "${icloudpd_extra[@]}"
